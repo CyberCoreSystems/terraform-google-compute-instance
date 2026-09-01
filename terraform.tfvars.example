@@ -1,0 +1,180 @@
+# ==============================================================================
+#  gcp-compute-instance — terraform.tfvars
+# ==============================================================================
+#  Copy this file to `terraform.tfvars`, set the values, then run:
+#      tofu init && tofu apply        (or:  terraform init && terraform apply)
+#
+# AUTHENTICATION — Google Cloud:
+#   The google provider authenticates via Google's Application Default
+#   Credentials (ADC) chain unless you override it.
+#   Quick start: gcloud auth application-default login (for Terraform/ADC).
+#   Also `gcloud auth login` for the CLI itself and `gcloud config set project
+#   <id>` to set the default project.
+#   Environment variables Terraform reads:
+#     GOOGLE_CREDENTIALS  (secret) — Service-account key as a file path OR raw JSON string (provider-specific, checked first).
+#     GOOGLE_APPLICATION_CREDENTIALS  (secret) — Standard ADC path to a key/external-account JSON file (used by WIF and the SDK).
+#     GOOGLE_PROJECT — Default project id for resources; alt: GOOGLE_CLOUD_PROJECT, GCLOUD_PROJECT, CLOUDSDK_CORE_PROJECT.
+#     GOOGLE_REGION — Default region; alt: GCLOUD_REGION, CLOUDSDK_COMPUTE_REGION.
+#     GOOGLE_ZONE — Default zone; alt: GCLOUD_ZONE, CLOUDSDK_COMPUTE_ZONE.
+#   Full guide (auth + remote state):  docs/CONNECTING-PROVIDERS.md#gcp
+#
+#  Secrets below read "REPLACE_ME" — never commit real secrets. Prefer
+#  TF_VAR_<name> environment variables or a secrets manager.
+#  Status: static-validated, live-test pending (see README.md).
+# ==============================================================================
+
+
+# ------------------------------------------------------------------------------
+#  REQUIRED — you must set these
+# ------------------------------------------------------------------------------
+
+# project_id  —  string  (REQUIRED)
+#   GCP project ID that hosts the instance.
+#   Constraint: project_id must be a valid GCP project ID (6-30 chars, lowercase
+#   letters, digits, hyphens).
+project_id = "iacbazaar-example-project"
+
+# name  —  string  (REQUIRED)
+#   Name of the Compute Engine instance (RFC1035: lowercase letters, digits,
+#   hyphens; must start with a letter).
+#   Constraint: name must be 1-63 chars, start with a lowercase letter, and
+#   contain only lowercase letters, digits and hyphens.
+name       = "example-app"
+
+# subnetwork  —  string  (REQUIRED)
+#   Subnetwork self link or name for the network interface. Required for
+#   custom-mode VPCs.
+#   Constraint: subnetwork must be a non-empty subnetwork name or self link.
+subnetwork = "projects/iacbazaar-example-project/regions/us-central1/subnetworks/default"
+
+# ------------------------------------------------------------------------------
+#  OPTIONAL — defaults shown; uncomment a line to override
+# ------------------------------------------------------------------------------
+
+# zone  —  string  (optional, default: null)
+#   Zone to launch the instance in (e.g. us-central1-a). Null falls back to the
+#   provider's configured zone.
+zone       = "us-central1-a"
+
+# machine_type  —  string  (optional, default: "e2-micro")
+#   Machine type. e2-micro is the smallest/cheapest general-purpose shape.
+# machine_type = "e2-micro"
+
+# image  —  string  (optional, default: "debian-cloud/debian-12")
+#   Boot disk image, as a family shorthand (project/family) or full self link.
+#   Defaults to Debian 12.
+# image = "debian-cloud/debian-12"
+
+# boot_disk_size_gb  —  number  (optional, default: 10)
+#   Boot disk size in GB.
+#   Constraint: boot_disk_size_gb must be between 10 and 65536.
+# boot_disk_size_gb = 10
+
+# boot_disk_type  —  string  (optional, default: "pd-balanced")
+#   Boot disk type: pd-standard, pd-balanced, pd-ssd or pd-extreme.
+#   Constraint: boot_disk_type must be one of: pd-standard, pd-balanced, pd-ssd,
+#   pd-extreme.
+# boot_disk_type = "pd-balanced"
+
+# boot_disk_auto_delete  —  bool  (optional, default: true)
+#   Delete the boot disk when the instance is deleted.
+# boot_disk_auto_delete = true
+
+# boot_disk_kms_key_self_link  —  string  (optional, default: null)
+#   Self link of a Cloud KMS crypto key to encrypt the boot disk with (CMEK),
+#   e.g. projects/PROJECT/locations/LOCATION/keyRings/RING/cryptoKeys/KEY. Null
+#   keeps Google-managed encryption (disks are always encrypted at rest). The
+#   Compute Engine service agent needs
+#   roles/cloudkms.cryptoKeyEncrypterDecrypter on the key.
+#   Constraint: boot_disk_kms_key_self_link must be null or a Cloud KMS crypto
+#   key path: projects/PROJECT/locations/LOCATION/keyRings/RING/cryptoKeys/KEY.
+# boot_disk_kms_key_self_link = null
+
+# network  —  string  (optional, default: null)
+#   VPC network self link or name for the network interface. Optional when
+#   subnetwork is set (the network is inferred).
+# network = null
+
+# network_ip  —  string  (optional, default: null)
+#   Static internal IP for the instance. Null lets GCP allocate one from the
+#   subnet.
+# network_ip = null
+
+# enable_public_ip  —  bool  (optional, default: false)
+#   Attach an ephemeral (or static) external IP. Off by default — keep instances
+#   private and use Cloud NAT for egress.
+# enable_public_ip = false
+
+# public_ip_address  —  string  (optional, default: null)
+#   Static external IP address to attach when enable_public_ip is true. Null =
+#   ephemeral IP.
+# public_ip_address = null
+
+# public_ip_network_tier  —  string  (optional, default: "PREMIUM")
+#   Network tier for the external IP: PREMIUM or STANDARD.
+#   Constraint: public_ip_network_tier must be PREMIUM or STANDARD.
+# public_ip_network_tier = "PREMIUM"
+
+# enable_secure_boot  —  bool  (optional, default: true)
+#   Shielded VM: enable Secure Boot (verified boot chain).
+# enable_secure_boot = true
+
+# enable_vtpm  —  bool  (optional, default: true)
+#   Shielded VM: enable the virtual Trusted Platform Module.
+# enable_vtpm = true
+
+# enable_integrity_monitoring  —  bool  (optional, default: true)
+#   Shielded VM: enable boot integrity monitoring.
+# enable_integrity_monitoring = true
+
+# enable_oslogin  —  bool  (optional, default: true)
+#   Enable OS Login (IAM-managed SSH access) via instance metadata. Strongly
+#   preferred over project-wide SSH keys.
+# enable_oslogin = true
+
+# block_project_ssh_keys  —  bool  (optional, default: true)
+#   Block project-wide SSH keys via instance metadata (block-project-ssh-keys).
+#   Defense in depth alongside OS Login; only instance-level keys/IAM grants can
+#   SSH.
+# block_project_ssh_keys = true
+
+# service_account  —  object  (optional, default: null)
+#   Custom service account for the instance. Null uses the default compute
+#   service account. scopes accepts aliases (e.g. cloud-platform).
+# service_account = null
+
+# tags  —  list  (optional, default: [])
+#   Network tags applied to the instance (used by firewall rule targeting).
+tags = ["app"]
+
+# labels  —  map  (optional, default: {})
+#   Labels applied to the instance and boot disk (lowercase keys/values per GCP
+#   label rules).
+labels = {
+  environment = "example"
+  managed_by  = "iac-bazaar"
+}
+
+# metadata  —  map  (optional, default: {})
+#   Instance metadata key/value pairs. Merged with the OS Login key (explicit
+#   keys here win).
+# metadata = {}
+
+# metadata_startup_script  —  string  (optional, default: null)
+#   Startup script run on boot. Null = none.
+# metadata_startup_script = null
+
+# can_ip_forward  —  bool  (optional, default: false)
+#   Allow the instance to send/receive packets with non-matching
+#   source/destination IPs (needed for NAT/router VMs).
+# can_ip_forward = false
+
+# allow_stopping_for_update  —  bool  (optional, default: true)
+#   Allow Terraform to stop the instance to apply updates that require it (e.g.
+#   machine type changes).
+# allow_stopping_for_update = true
+
+# deletion_protection  —  bool  (optional, default: true)
+#   Protect the instance from accidental deletion. Set false to allow terraform
+#   destroy.
+# deletion_protection = true
